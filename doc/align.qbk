@@ -375,6 +375,7 @@ The following compilers and platforms have been tested.
 
 * clang 3.0, 3.1, 3.2, 3.4, 3.5, linux
 * gcc 4.4, 4.5, 4.6, 4.7, 4.8, 4.9, linux
+* intel 11.1, 12.1, 13.0, linux
 * msvc 9.0, 10.0, 11.0, 12.0, windows
 
 Any conforming C++11 or C++03 compiler is supported.
