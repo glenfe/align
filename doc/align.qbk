@@ -83,37 +83,54 @@ that objects have a specified extended alignment.
 
 [section Tutorial]
 
-[section Align a pointer to storage]
+[section Align a pointer]
 
-Include the align.hpp header for access to the function
-`align`.
+We want to default-construct an object of a potentially
+over-aligned generic type, `T`, in storage of size `n`,
+whose address is stored in a pointer, `p`.
 
 ``
 #include <boost/align/align.hpp>
 ``
 
-Use the `align` function to adjust a pointer so that it
-is suitably aligned to fit a desired size in given space.
+Use the `align` function to adjust the pointer so that it
+is suitably aligned.
 
 ``
 auto result =
-    boost::alignment::align(alignment, size, p, space);
-if (!result) {
+    boost::alignment::align(alignof(T), sizeof(T),
+    p, n);
+``
+
+If successful, `n` is decreased by the byte count that
+`p` was advanced to be suitably aligned, and the adjusted
+value of `p` is returned. It now points to an address at
+which to construct an object of type `T`.
+
+``
+if (result) {
+    ::new(result) T();
+}
+``
+
+If unsuccessful, because `n` has insufficient space
+to fit an object of the requested size after adjusting
+`p` to have the requested alignment, a null pointer is
+returned and `p` and `n` are not changed.
+
+``
+else {
     throw std::exception();
 }
 ``
-If successful, the space is decreased by the byte count
-the pointer was advanced for alignment.
-
-[note Consult the reference section of this documentation
-  for the requirements and effects.]
 
 [endsect]
 
-[section Alignment aware allocation]
+[section Aligned allocation]
 
-Include the aligned_alloc.hpp header for access
-to functions `aligned_alloc` and `aligned_free`.
+We want to dynamically allocate storage for, and
+default-construct within that storage, an object of a
+generic type `T` that is potentially over-aligned.
 
 ``
 #include <boost/align/aligned_alloc.hpp>
@@ -124,121 +141,140 @@ the `aligned_alloc` allocation function.
 
 ``
 auto p =
-    boost::alignment::aligned_alloc(alignment, size);
+    boost::alignment::aligned_alloc(alignof(T),
+    sizeof(T));
+``
+
+If successful, a non-null pointer is returned. To free
+this storage the `aligned_free` function is used.
+
+``
 if (!p) {
+    try {
+        ::new(p) T();
+    } catch (...) {
+        boost::alignment::aligned_free(p);
+        throw;
+    }
+}
+``
+
+If unsuccessful, a null pointer is returned.
+
+``
+else {
     throw std::bad_alloc();
 }
 ``
 
-Deallocate the object allocated above, when done, using
-the `aligned_free` deallocation function.
+Free this storage, via the `aligned_free` function when
+it is no longer required.
 
 ``
 boost::alignment::aligned_free(p);
 ``
 
-These functions are alignment aware alternatives to
-`::operator new` and `::operator delete`.
-
-[note Prefer the alignment allocators with containers
-  or smart pointers instead of managing memory with raw
-  pointers.]
-
 [endsect]
 
-[section Use an alignment allocator]
+[section Alignment allocator]
 
-Include the aligned_allocator.hpp header for access
-to the class template `aligned_allocator`.
+We want to use standard library allocator-aware
+containers, such as `vector`, with a generic type,
+`T`, that is potentially over-aligned.
 
 ``
 #include <boost/align/aligned_allocator.hpp>
 ``
 
-Turn any container into one that supports over-aligned
-types using the `aligned_allocator` allocator.
+Specify the `aligned_allocator` allocator via the
+container's allocator template parameter.
 
 ``
-std::vector<type,
-    boost::alignment::aligned_allocator<type> > v;
+std::vector<T,
+    boost::alignment::aligned_allocator<T> > v;
 ``
 
-The `vector` elements will be correctly aligned even
-when `type` has an extended alignment specified.
+If we wanted a vector of a different type, such as
+`int`, but desired that each integer object had the
+alignment of `T`, this is possible by specifying
+the minimum-alignment with the alignment allocator.
 
 ``
 std::vector<int,
-    boost::alignment::aligned_allocator<int, 64> > v;
+    boost::alignment::aligned_allocator<int,
+    aligof(T)> > v;
 ``
-
-As shown above, can optionally specify a minimum
-alignment value to use for all allocations.
 
 [endsect]
 
-[section Adapt allocator for alignment]
+[section Alignment allocator adaptor]
 
-Include the aligned_allocator_adaptor.hpp header for
-access to the class `aligned_allocator_adaptor`.
+We want to make an existing allocator type, `A`,
+alignment-aware and use it with a standard library
+container, such as `vector`, with a type, `T`,
+that is potentially over-aligned.
 
 ``
 #include <boost/align/aligned_allocator_adaptor.hpp>
 ``
 
-You can use this adaptor to turn any existing allocator
-into one that supports allocation of over-aligned types.
+We use class template `aligned_allocator_adaptor` as
+the vector's allocator type.
 
 ``
-Allocator a;
-boost::alignment::aligned_allocator_adaptor<Allocator,
-    Alignment> b(a);
+std::vector<T,
+    boost::alignment::aligned_allocator_adaptor<A> > v;
 ``
 
-Specifying the minimum alignment, as shown above, is
-optional, just as it is with `aligned_allocator`.
+As with the tutorial on `aligned_allocator`, we show
+the example of a vector of integers with this allocator
+adaptor with a minimum alignment.
+
+``
+std::vector<int,
+    boost::alignment::aligned_allocator_adaptor<A,
+    alignof(T)> > v;
+``
 
 [endsect]
 
-[section Alignment aware deleter]
+[section Alignment deleter]
 
-Include the aligned_delete.hpp header for
-access to the class `aligned_delete`.
+We want a default deleter for use with `unique_ptr`
+that can be used to deallocate and destroy objects
+which were constructed in storage that was allocated
+with `aligned_alloc`.
 
 ``
 #include <boost/align/aligned_delete.hpp>
 ``
 
-When using `aligned_alloc` for allocation,
-`aligned_delete` can be used as a deleter.
+Use the `aligned_delete` class as the deleter
+template parameter.
 
 ``
-std::unique_ptr<type,
+std::unique_ptr<T,
     boost::alignment::aligned_delete> p;
 ``
 
-As indicated above, it can serve as a
-replacement for `std::default_delete`.
-
 [endsect]
 
-[section Verifying pointer alignment]
+[section Check alignment]
 
-Include the is_aligned.hpp header for
-access to the function `is_aligned`.
+We want to assert that the alignment of a pointer, `p`,
+is at least the alignment of a generic type, `T`, that
+is potentially over-aligned.
 
 ``
 #include <boost/align/is_aligned.hpp>
 ``
 
-You can use the `is_aligned` function to test the
-minimum alignment of a pointer.
+Use the `is_aligned` function to test the alignment of
+the pointer.
 
 ``
-assert(boost::alignment::is_aligned(16, p));
+assert(boost::alignment::is_aligned(alignof(T), p));
 ``
-
-This can be used for verification or to choose
-a fast code path for aligned memory.
 
 [endsect]
 
