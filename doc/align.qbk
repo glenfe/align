@@ -149,7 +149,7 @@ If successful, a non-null pointer is returned. To free
 this storage the `aligned_free` function is used.
 
 ``
-if (!p) {
+if (p) {
     try {
         ::new(p) T();
     } catch (...) {
@@ -197,7 +197,7 @@ std::vector<T,
 If we wanted a vector of a different type, such as
 `int`, but desired that each integer object had the
 alignment of `T`, this is possible by specifying
-the minimum-alignment with the alignment allocator.
+the minimum alignment with the allocator.
 
 ``
 std::vector<int,
@@ -222,23 +222,24 @@ We use class template `aligned_allocator_adaptor` as
 the vector's allocator type.
 
 ``
-std::vector<T,
-    boost::alignment::aligned_allocator_adaptor<A> > v;
+std::vector<T, boost::alignment::
+    aligned_allocator_adaptor<A<T> > > v(a);
 ``
 
-As with the tutorial on `aligned_allocator`, we show
-the example of a vector of integers with this allocator
-adaptor with a minimum alignment.
+If we wanted a vector of a different type, such as
+`int`, but desired that each integer object had the
+alignment of `T`, this is possible by specifying
+the minimum alignment with the allocator adaptor.
 
 ``
 std::vector<int,
-    boost::alignment::aligned_allocator_adaptor<A,
-    alignof(T)> > v;
+    boost::alignment::aligned_allocator_adaptor<A<int>,
+    alignof(T)> > v(a);
 ``
 
 [endsect]
 
-[section Alignment deleter]
+[section Aligned deleter]
 
 We want a default deleter for use with `unique_ptr`
 that can be used to deallocate and destroy objects
@@ -249,12 +250,36 @@ with `aligned_alloc`.
 #include <boost/align/aligned_delete.hpp>
 ``
 
+Storage is allocated for the object using
+`aligned_alloc`.
+
+``
+auto p =
+    boost::alignment::aligned_alloc(alignof(T),
+    sizeof(T));
+if (!p) {
+    throw std::bad_alloc();
+}
+``
+
+An object is constructed in that storage
+using placement new.
+
+``
+try {
+    q = ::new(p) T();
+} catch (...) {
+    boost::alignment::aligned_free(p);
+    throw;
+}
+``
+
 Use the `aligned_delete` class as the deleter
 template parameter.
 
 ``
 std::unique_ptr<T,
-    boost::alignment::aligned_delete> p;
+    boost::alignment::aligned_delete> u(q);
 ``
 
 [endsect]
