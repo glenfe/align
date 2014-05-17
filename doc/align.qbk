@@ -83,7 +83,7 @@ that objects have a specified extended alignment.
 
 [section Tutorial]
 
-[section Align a pointer]
+[section Using align]
 
 We want to default-construct an object of a potentially
 over-aligned generic type, `T`, in storage of size `n`,
@@ -97,9 +97,8 @@ Use the `align` function to adjust the pointer so that it
 is suitably aligned.
 
 ``
-auto result =
-    boost::alignment::align(alignof(T), sizeof(T),
-    p, n);
+auto result = boost::alignment::
+    align(alignof(T), sizeof(T), p, n);
 ``
 
 If successful, `n` is decreased by the byte count that
@@ -126,7 +125,7 @@ else {
 
 [endsect]
 
-[section Aligned allocation]
+[section Using aligned_alloc]
 
 We want to dynamically allocate storage for, and
 default-construct within that storage, an object of a
@@ -140,9 +139,8 @@ Allocate an object of a desired alignment and size using
 the `aligned_alloc` allocation function.
 
 ``
-auto p =
-    boost::alignment::aligned_alloc(alignof(T),
-    sizeof(T));
+auto p = boost::alignment::
+    aligned_alloc(alignof(T), sizeof(T));
 ``
 
 If successful, a non-null pointer is returned. To free
@@ -167,8 +165,8 @@ else {
 }
 ``
 
-Free this storage, via the `aligned_free` function when
-it is no longer required.
+Free this storage, via the `aligned_free` function,
+when it is no longer required.
 
 ``
 boost::alignment::aligned_free(p);
@@ -176,7 +174,7 @@ boost::alignment::aligned_free(p);
 
 [endsect]
 
-[section Alignment allocator]
+[section Using aligned_allocator]
 
 We want to use standard library allocator-aware
 containers, such as `vector`, with a generic type,
@@ -190,8 +188,8 @@ Specify the `aligned_allocator` allocator via the
 container's allocator template parameter.
 
 ``
-std::vector<T,
-    boost::alignment::aligned_allocator<T> > v;
+std::vector<T, boost::alignment::
+    aligned_allocator<T> > v;
 ``
 
 If we wanted a vector of a different type, such as
@@ -200,14 +198,13 @@ alignment of `T`, this is possible by specifying
 the minimum alignment with the allocator.
 
 ``
-std::vector<int,
-    boost::alignment::aligned_allocator<int,
-    aligof(T)> > v;
+std::vector<int, boost::alignment::
+    aligned_allocator<int, alignof(T)> > v;
 ``
 
 [endsect]
 
-[section Alignment allocator adaptor]
+[section Using aligned_allocator_adaptor]
 
 We want to make an existing allocator type, `A`,
 alignment-aware and use it with a standard library
@@ -223,7 +220,7 @@ the vector's allocator type.
 
 ``
 std::vector<T, boost::alignment::
-    aligned_allocator_adaptor<A<T> > > v(a);
+    aligned_allocator_adaptor<A> > v(a);
 ``
 
 If we wanted a vector of a different type, such as
@@ -232,14 +229,13 @@ alignment of `T`, this is possible by specifying
 the minimum alignment with the allocator adaptor.
 
 ``
-std::vector<int,
-    boost::alignment::aligned_allocator_adaptor<A<int>,
-    alignof(T)> > v(a);
+std::vector<int, boost::alignment::
+    aligned_allocator_adaptor<A, alignof(T)> > v(a);
 ``
 
 [endsect]
 
-[section Aligned deleter]
+[section Using aligned_delete]
 
 We want a default deleter for use with `unique_ptr`
 that can be used to deallocate and destroy objects
@@ -254,9 +250,8 @@ Storage is allocated for the object using
 `aligned_alloc`.
 
 ``
-auto p =
-    boost::alignment::aligned_alloc(alignof(T),
-    sizeof(T));
+auto p = boost::alignment::
+    aligned_alloc(alignof(T), sizeof(T));
 if (!p) {
     throw std::bad_alloc();
 }
@@ -284,7 +279,7 @@ std::unique_ptr<T,
 
 [endsect]
 
-[section Check alignment]
+[section Using is_aligned]
 
 We want to assert that the alignment of a pointer, `p`,
 is at least the alignment of a generic type, `T`, that
