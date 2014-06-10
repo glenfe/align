@@ -11,17 +11,10 @@
 
 #include <boost/align/detail/min_size.hpp>
 #include <boost/align/detail/no_ref.hpp>
+#include <boost/align/detail/padded.hpp>
 
 namespace boost {
     namespace alignment {
-        namespace detail {
-            template<class T>
-            struct padded {
-                char unit;
-                typename no_ref<T>::type object;
-            };
-        }
-
         template<class T>
         struct alignment_of {
             enum {

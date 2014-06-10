@@ -33,6 +33,9 @@ int main()
     test<float>();
     test<double>();
     test<long double>();
+    test<int[4]>();
+    test<void*>();
+    test<void(*)()>();
 
     return boost::report_errors();
 }
