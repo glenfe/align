@@ -15,3 +15,5 @@ run aligned_delete_test.cpp ;
 run alignment_of_test.cpp ;
 run assume_aligned_test.cpp ;
 run is_aligned_test.cpp ;
+run align_next_test.cpp ;
+run align_prev_test.cpp ;

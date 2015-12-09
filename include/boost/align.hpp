@@ -17,5 +17,7 @@ http://boost.org/LICENSE_1_0.txt
 #include <boost/align/alignment_of.hpp>
 #include <boost/align/assume_aligned.hpp>
 #include <boost/align/is_aligned.hpp>
+#include <boost/align/align_next.hpp>
+#include <boost/align/align_prev.hpp>
 
 #endif
