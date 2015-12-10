@@ -19,24 +19,28 @@ http://boost.org/LICENSE_1_0.txt
 #include <AvailabilityMacros.h>
 #endif
 
-#if defined(_MSC_VER)
-#include <boost/align/detail/aligned_alloc_msvc.hpp>
-#elif defined(__MINGW32__) && (__MSVCRT_VERSION__ >= 0x0700)
-#include <boost/align/detail/aligned_alloc_msvc.hpp>
-#elif MAC_OS_X_VERSION_MIN_REQUIRED >= 1090
-#include <boost/align/detail/aligned_alloc_posix.hpp>
-#elif MAC_OS_X_VERSION_MIN_REQUIRED >= 1060
-#include <boost/align/detail/aligned_alloc_macos.hpp>
-#elif defined(__ANDROID__)
-#include <boost/align/detail/aligned_alloc_android.hpp>
-#elif defined(__SunOS_5_11) || defined(__SunOS_5_12)
-#include <boost/align/detail/aligned_alloc_posix.hpp>
-#elif defined(sun) || defined(__sun)
-#include <boost/align/detail/aligned_alloc_sunos.hpp>
-#elif (_POSIX_C_SOURCE >= 200112L) || (_XOPEN_SOURCE >= 600)
-#include <boost/align/detail/aligned_alloc_posix.hpp>
+#if !defined(BOOST_ALIGN_CUSTOM_MEMORY_HANDLERS)
+#   if defined(_MSC_VER)
+#   include <boost/align/detail/aligned_alloc_msvc.hpp>
+#   elif defined(__MINGW32__) && (__MSVCRT_VERSION__ >= 0x0700)
+#   include <boost/align/detail/aligned_alloc_msvc.hpp>
+#   elif MAC_OS_X_VERSION_MIN_REQUIRED >= 1090
+#   include <boost/align/detail/aligned_alloc_posix.hpp>
+#   elif MAC_OS_X_VERSION_MIN_REQUIRED >= 1060
+#   include <boost/align/detail/aligned_alloc_macos.hpp>
+#   elif defined(__ANDROID__)
+#   include <boost/align/detail/aligned_alloc_android.hpp>
+#   elif defined(__SunOS_5_11) || defined(__SunOS_5_12)
+#   include <boost/align/detail/aligned_alloc_posix.hpp>
+#   elif defined(sun) || defined(__sun)
+#   include <boost/align/detail/aligned_alloc_sunos.hpp>
+#   elif (_POSIX_C_SOURCE >= 200112L) || (_XOPEN_SOURCE >= 600)
+#   include <boost/align/detail/aligned_alloc_posix.hpp>
+#   else
+#   include <boost/align/detail/aligned_alloc.hpp>
+#   endif
 #else
-#include <boost/align/detail/aligned_alloc.hpp>
+#   include <boost/align/detail/aligned_alloc.hpp>
 #endif
 
 #endif

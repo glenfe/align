@@ -2,6 +2,8 @@
 (c) 2014-2015 Glen Joseph Fernandes
 <glenjofe -at- gmail.com>
 
+(c) 2015 NumScale SAS
+
 Distributed under the Boost Software
 License, Version 1.0.
 http://boost.org/LICENSE_1_0.txt
@@ -19,6 +21,11 @@ http://boost.org/LICENSE_1_0.txt
 namespace boost {
 namespace alignment {
 
+#if defined(BOOST_ALIGN_CUSTOM_MEMORY_HANDLERS)
+void* custom_malloc(std::size_t);
+void  custom_free(void*);
+#endif
+
 inline void* aligned_alloc(std::size_t alignment, std::size_t size)
     BOOST_NOEXCEPT
 {
@@ -29,9 +36,20 @@ inline void* aligned_alloc(std::size_t alignment, std::size_t size)
     if (alignment < N) {
         alignment = N;
     }
+#if defined(BOOST_ALIGN_CUSTOM_MEMORY_HANDLERS)
+    // We cannot assume that user-defined custom malloc will
+    // align on `void*` alignment!
+    std::size_t n = size + alignment;
+#else
+    // Spatial optimizations ONLY when using std::malloc
     std::size_t n = size + alignment - N;
+#endif
     void* p1 = 0;
+#if defined(BOOST_ALIGN_CUSTOM_MEMORY_HANDLERS)
+    void* p2 = custom_malloc(n + sizeof p1);
+#else
     void* p2 = std::malloc(n + sizeof p1);
+#endif
     if (p2) {
         p1 = static_cast<char*>(p2) + sizeof p1;
         (void)align(alignment, size, p1, n);
@@ -44,7 +62,11 @@ inline void aligned_free(void* ptr) BOOST_NOEXCEPT
 {
     if (ptr) {
         void* p = *(static_cast<void**>(ptr) - 1);
+#if defined(BOOST_ALIGN_CUSTOM_MEMORY_HANDLERS)
+        custom_free(p);
+#else
         std::free(p);
+#endif
     }
 }
 
