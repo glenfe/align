@@ -52,6 +52,12 @@ verify pointer value alignment.
   [ [`is_aligned`]
     [Pointer alignment verification function]
   ]
+  [ [`align_next`]
+    [Get next alignment for given pointer or value]
+  ]
+  [ [`align_prev`]
+    [Get previous alignment for given pointer or value]
+  ]
 ]
 
 [endsect]
@@ -392,6 +398,69 @@ int main()
 {
     alignas(16) char c[64];
     use(c);
+}
+``
+
+[endsect]
+
+[section align_next]
+
+This function returns the *next* valid value or pointer for the given alignment.
+If it is already aligned with the good alignment, then `align_next` will return
+the same value.
+
+``
+#include <boost/align/align_next.hpp>
+#include <cassert>
+
+void use(std::size_t value)
+{
+    assert(boost::alignment::is_aligned(value, 16));
+}
+
+void use(void* ptr)
+{
+    assert(boost::alignment::is_aligned(ptr, 16));
+}
+
+int main()
+{
+    std::size_t addr = 0x3;
+    use(align_next(16, 16));
+    use(align_next(16, addr));
+    use(align_next(16, reinterpret_cast<void*>(16));
+    use(align_next(16, reinterpret_cast<void*>(addr));
+}
+``
+
+[endsect]
+
+[section align_prev]
+
+Same as `align_next` but will return the *previous* valid value or pointer for the
+given alignment.
+
+``
+#include <boost/align/align_prev.hpp>
+#include <cassert>
+
+void use(std::size_t value)
+{
+    assert(boost::alignment::is_aligned(value, 16));
+}
+
+void use(void* ptr)
+{
+    assert(boost::alignment::is_aligned(ptr, 16));
+}
+
+int main()
+{
+    std::size_t addr = 0x18;
+    use(align_prev(16, 16));
+    use(align_prev(16, addr));
+    use(align_prev(16, reinterpret_cast<void*>(16));
+    use(align_prev(16, reinterpret_cast<void*>(addr));
 }
 ``
 
