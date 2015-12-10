@@ -182,6 +182,43 @@ int main()
 }
 ``
 
+You may want to use your own custom memory handlers while using
+`aligned_alloc` and `aligned_free`. To do so, you have enable them by
+defining the special define `BOOST_ALIGN_CUSTOM_MEMORY_HANDLERS` and by
+providing two functions `custom_malloc` and `custom_free`. Those twos *MUST*
+live in the `boost::alignment` namespace.
+
+``
+// You could also use `-DBOOST_ALIGN_CUSTOM_MEMORY_HANDLERS` on the command line for gcc or clang
+#define BOOST_ALIGN_CUSTOM_MEMORY_HANDLERS
+#include <boost/align/aligned_alloc.hpp>
+
+namespace boost {
+namespace alignment {
+
+void* custom_malloc(std::size_t)
+{
+    // You `malloc` implementation
+    return 0;
+}
+
+void custom_free(void*)
+{
+    // You `free` implementation
+}
+
+} /* .alignment */
+} /* .boost */
+
+int main()
+{
+    void* p = boost::alignment::aligned_alloc(16, 100);
+    if (p) {
+        boost::alignment::aligned_free(p);
+    }
+}
+``
+
 [endsect]
 
 [section aligned_allocator]
