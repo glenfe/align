@@ -9,6 +9,7 @@ import testing ;
 
 run align_test.cpp ;
 run aligned_alloc_test.cpp ;
+run aligned_alloc_custom_malloc_test.cpp ;
 run aligned_allocator_test.cpp ;
 run aligned_allocator_adaptor_test.cpp ;
 run aligned_delete_test.cpp ;
