@@ -2,6 +2,8 @@
 (c) 2014 Glen Joseph Fernandes
 <glenjofe -at- gmail.com>
 
+(c) 2015 NumScale SAS
+
 Distributed under the Boost Software
 License, Version 1.0.
 http://boost.org/LICENSE_1_0.txt
@@ -23,9 +25,17 @@ void test()
         void* p = &b[n];
         BOOST_TEST(boost::alignment::is_aligned(n, p));
     }
+    {
+        BOOST_TEST(boost::alignment::is_aligned(Alignment, n));
+    }
     if (n > 1) {
-        void* p = &b[1];
-        BOOST_TEST(!boost::alignment::is_aligned(n, p));
+        {
+            void* p = &b[1];
+            BOOST_TEST(!boost::alignment::is_aligned(n, p));
+        }
+        {
+            BOOST_TEST(!boost::alignment::is_aligned(Alignment, n + 1));
+        }
     }
 }
 

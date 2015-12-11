@@ -375,13 +375,18 @@ int main()
 
 [section is_aligned]
 
-This function is used to compare the alignment of a pointer. It is
-useful in assertions that validate a pointer value is aligned on a
+This function is used to compare the alignment of a pointer or a value.
+It is useful in assertions that validate a pointer value is aligned on a
 given boundary.
 
 ``
 #include <boost/align/is_aligned.hpp>
 #include <cassert>
+
+void use(std::size_t value)
+{
+    assert(boost::alignment::is_aligned(value, 16));
+}
 
 void use(void* ptr)
 {
@@ -392,6 +397,7 @@ int main()
 {
     alignas(16) char c[64];
     use(c);
+    use(16);
 }
 ``
 
