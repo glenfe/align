@@ -18,5 +18,7 @@ Distributed under the Boost Software License, Version 1.0.
 #include <boost/align/alignment_of.hpp>
 #include <boost/align/assume_aligned.hpp>
 #include <boost/align/is_aligned.hpp>
+#include <boost/align/align_next.hpp>
+#include <boost/align/align_prev.hpp>
 
 #endif
